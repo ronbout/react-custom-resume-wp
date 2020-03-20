@@ -1,7 +1,7 @@
 /* CustomResumeContainer.js */
 import React, { Component } from "react";
 import CustomResume from "./CustomResume";
-import { candidateInfo } from "components/CandidateProfile/dummyData";
+import { candidateInfo } from "./dummyData";
 import dataFetch from "assets/js/dataFetch";
 
 const API_CANDIDATES = "candidates";
