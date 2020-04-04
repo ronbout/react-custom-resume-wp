@@ -3,7 +3,6 @@
  * and will clean up the fetch routines so that all have a standard
  * code.  It will use try/catch for error handling.
  */
-
 import { convertNullsToEmpty } from "./library.js";
 
 const API_QUERY = "?api_cc=three&api_key=fj49fk390gfk3f50";
@@ -15,15 +14,35 @@ export default async function dataFetch(
 	queryStr = "",
 	httpMethod = "GET",
 	body = null,
-	formData = false
+	formData = false,
+	urlBase = window.apiUrl,
+	wpFlag = false, // the resume api's return a data object when successful.  wp does not
+	wpNonce = ""
 ) {
-	const urlBase = window.apiUrl;
-
-	let basicUrl = `${urlBase}${endpoint}${API_QUERY}${queryStr}`;
+	const apiQuery = !wpFlag ? API_QUERY : queryStr ? "?" : "";
+	let basicUrl = `${urlBase}${endpoint}${apiQuery}${queryStr}`;
 	let headers = formData
 		? {}
 		: { headers: { "Content-Type": "application/json" } };
 
+	if (wpFlag) {
+		let wpHeaders = wpNonce
+			? {
+					"X-WP-Nonce": wpNonce
+			  }
+			: {
+					Authorization: `Basic ${window.btoa(
+						"Ronbout:xid4oN&@g4y9wTAul&Kfirs8"
+					)}`
+			  };
+		headers = {
+			headers: {
+				...headers.headers,
+				...wpHeaders
+			}
+		};
+	}
+	console.log("headers: ", headers);
 	let httpConfig = body
 		? {
 				method: httpMethod,
@@ -38,7 +57,8 @@ export default async function dataFetch(
 		if (result.error) {
 			return result;
 		} else {
-			result = convertNullsToEmpty(result.data);
+			const resultData = !wpFlag ? result.data : result;
+			result = convertNullsToEmpty(resultData);
 			return result;
 		}
 	} catch (error) {

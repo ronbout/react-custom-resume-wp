@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import WpResumes from "./WpResumes";
+import { writeWpResumeFiles } from "./writeWpResumeFiles";
 import TextField from "styledComponents/TextField";
 import SwitchBase from "styledComponents/SwitchBase";
 import Button from "styledComponents/Button";
@@ -22,7 +24,8 @@ const defaultLayout = {
 		{ name: "hi" }, // Highlights
 		{ name: "ex" }, // Experience
 		{ name: "ed" }, // Education
-		{ name: "ct" } // Certifications
+		{ name: "ct" }, // Certifications
+		{ name: "dl" } // Resumes to download to wp site
 	]
 };
 
@@ -52,7 +55,7 @@ const includeOnlySkillsOn = {
 	techtags: true
 };
 
-const CustomResume = ({ candidate, techtagSkills }) => {
+const CustomResume = ({ candidate, techtagSkills, wpResumes, wpUserId }) => {
 	const [skills, setSkills] = useState("");
 	const [maxEntries, setMaxEntries] = useState(defaultMaxEntries);
 	const [includeOnlySkills, setIncludeOnlySkills] = useState(
@@ -60,11 +63,9 @@ const CustomResume = ({ candidate, techtagSkills }) => {
 	);
 	const [includeObjective, setIncludeObjective] = useState(true);
 	const [includeProfSummary, setIncludeProfSummary] = useState(true);
+	const [resList, setResList] = useState([]);
 
-	useEffect(() => {
-		console.log("candidate: ", candidate);
-		console.log("techtagSkills: ", techtagSkills);
-	}, [candidate, techtagSkills]);
+	useEffect(() => {}, [candidate, techtagSkills]);
 
 	const handleCustomize = () => {
 		// setSkillsArray(skills.trim().split(","));
@@ -75,11 +76,15 @@ const CustomResume = ({ candidate, techtagSkills }) => {
 			includeObjective,
 			includeProfSummary
 		};
+
+		let wpFileName = `${wpUserId}-${Date.now()}`;
 		const resumeJson = buildCustomResumeJson(
 			defaultLayout,
 			candidate,
 			techtagSkills,
-			resumeSettings
+			resumeSettings,
+			resList,
+			wpFileName
 		);
 		console.log("resumeJson: ", resumeJson);
 		const layoutUri = encodeURIComponent(JSON.stringify(resumeJson));
@@ -87,13 +92,20 @@ const CustomResume = ({ candidate, techtagSkills }) => {
 			`${window.resumeUrl}?id=${candidate.id}&layout=${layoutUri}`,
 			"_blank"
 		);
+		// if resList contains true write to wp api to update _resume_file
+		resList.includes(true) &&
+			writeWpResumeFiles(wpFileName, wpResumes, resList);
 	};
 
 	const setAllSkillSwitches = onOff => {
-		console.log("onOff: ", onOff);
 		onOff
 			? setIncludeOnlySkills(includeOnlySkillsOn)
 			: setIncludeOnlySkills(includeOnlySkillsOff);
+	};
+
+	const handleResSelect = rList => {
+		setResList(rList);
+		console.log("resume checklist: ", rList);
 	};
 
 	return (
@@ -106,6 +118,7 @@ const CustomResume = ({ candidate, techtagSkills }) => {
 						<h1>{candidate.person.formattedName} Resume Creation</h1>
 					</div>
 					<div>
+						<WpResumes resumes={wpResumes} handleResSelect={handleResSelect} />
 						<div className="parameters">
 							<div className="tsd-form-row">
 								<TextField
@@ -341,7 +354,7 @@ const CustomResume = ({ candidate, techtagSkills }) => {
 									className="btn btn-info"
 									onClick={handleCustomize}
 								>
-									View Resume
+									Create Resume
 								</Button>
 							</div>
 						</div>

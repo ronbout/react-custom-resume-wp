@@ -15,10 +15,16 @@ class CustomResumeContainer extends Component {
 		// if no such parm, then must be add mode
 		const candId =
 			window.tsdData && window.tsdData.candId ? window.tsdData.candId : 7;
+
+		this.wpUserId =
+			window.tsdData && window.tsdData.userId ? window.tsdData.userId : 22;
+
 		this.state = {
 			candidate: candidateInfo,
 			techtagSkills: [],
-			candId
+			wpResumes: false,
+			candId,
+			wpFileName: ""
 		};
 	}
 
@@ -27,6 +33,9 @@ class CustomResumeContainer extends Component {
 		this.state.candId !== "undefined" &&
 			this.loadCandidateInfo(this.state.candId) &&
 			this.loadCandidateSkills(this.state.candId);
+
+		// if userId exists, then pull from wp api
+		this.wpUserId && this.loadWpResumes(this.wpUserId);
 	}
 
 	loadCandidateInfo = async candId => {
@@ -80,11 +89,36 @@ class CustomResumeContainer extends Component {
 		}
 	};
 
+	loadWpResumes = async userId => {
+		const urlBase = window.wpApi.root;
+		const endpoint = "wp/v2/resumes";
+		const queryStr = "author=" + userId;
+		const wpResumes = await dataFetch(
+			endpoint,
+			queryStr,
+			"GET",
+			null,
+			false,
+			urlBase,
+			true
+		);
+		if (wpResumes.code) {
+			console.log("Error accessing Wordpress ATS resumes: ", wpResumes);
+		} else {
+			console.log("Wordpress ATS resumes: ", wpResumes);
+			this.setState({
+				wpResumes
+			});
+		}
+	};
+
 	render() {
 		return (
 			<CustomResume
 				candidate={this.state.candidate}
 				techtagSkills={this.state.techtagSkills}
+				wpResumes={this.state.wpResumes}
+				wpUserId={this.wpUserId}
 			/>
 		);
 	}

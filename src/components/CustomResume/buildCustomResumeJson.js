@@ -14,7 +14,9 @@ export const buildCustomResumeJson = (
 	layout,
 	candidate,
 	techtagSkills,
-	resumeSettings
+	resumeSettings,
+	resList, // resume checkbox results for download
+	wpFileName // used to download if any true in resList
 ) => {
 	const {
 		skills,
@@ -94,7 +96,9 @@ export const buildCustomResumeJson = (
 		candCertification,
 		techtagIds,
 		includeObjective,
-		includeProfSummary
+		includeProfSummary,
+		resList,
+		wpFileName
 	);
 	return resumeJson;
 };
@@ -296,7 +300,9 @@ const loadLayout = (
 	candCertification,
 	techtagIds,
 	includeObjective,
-	includeProfSummary
+	includeProfSummary,
+	resList,
+	wpFileName
 ) => {
 	let layout = objCopy(origLayout);
 	// remove objective and profSummary if not included
@@ -334,6 +340,11 @@ const loadLayout = (
 				return {
 					...section,
 					disp: candCertification
+				};
+			case "dl":
+				return {
+					...section,
+					file: resList.includes(true) ? wpFileName : ""
 				};
 			default:
 				return { ...section };
