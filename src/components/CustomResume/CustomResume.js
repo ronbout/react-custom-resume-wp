@@ -1,10 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import WpResumes from "./WpResumes";
-import { writeWpResumeFiles } from "./writeWpResumeFiles";
 import TextField from "styledComponents/TextField";
 import SwitchBase from "styledComponents/SwitchBase";
 import Button from "styledComponents/Button";
-import { buildCustomResumeJson } from "./buildCustomResumeJson";
 import { isEmptyObject } from "assets/js/library";
 
 import "./css/customResume.css";
@@ -12,101 +10,24 @@ import "./css/customResume.css";
 const numWidthStyle = {
 	maxWidth: "240px",
 	minWidth: "240px",
-	marginRight: "100px"
+	marginRight: "100px",
 };
 
-const defaultLayout = {
-	sections: [
-		{ name: "hd" }, // header info
-		{ name: "ob" }, // Objective,
-		{ name: "ps" }, // Professional Summary
-		{ name: "ts" }, // Tech skills
-		{ name: "hi" }, // Highlights
-		{ name: "ex" }, // Experience
-		{ name: "ed" }, // Education
-		{ name: "ct" }, // Certifications
-		{ name: "dl" } // Resumes to download to wp site
-	]
-};
-
-const defaultMaxEntries = {
-	highlights: 99,
-	jobs: 99,
-	jobHighlights: 99,
-	education: 99,
-	certifications: 99
-};
-
-const includeOnlySkillsOff = {
-	highlights: false,
-	jobs: false,
-	jobHighlights: false,
-	education: false,
-	certifications: false,
-	techtags: false
-};
-
-const includeOnlySkillsOn = {
-	highlights: true,
-	jobs: true,
-	jobHighlights: true,
-	education: true,
-	certifications: true,
-	techtags: true
-};
-
-const CustomResume = ({ candidate, techtagSkills, wpResumes, wpUserId }) => {
-	const [skills, setSkills] = useState("");
-	const [maxEntries, setMaxEntries] = useState(defaultMaxEntries);
-	const [includeOnlySkills, setIncludeOnlySkills] = useState(
-		includeOnlySkillsOff
-	);
-	const [includeObjective, setIncludeObjective] = useState(true);
-	const [includeProfSummary, setIncludeProfSummary] = useState(true);
-	const [resList, setResList] = useState([]);
-
-	useEffect(() => {}, [candidate, techtagSkills]);
-
-	const handleCustomize = () => {
-		// setSkillsArray(skills.trim().split(","));
-		const resumeSettings = {
-			skills,
-			maxEntries,
-			includeOnlySkills,
-			includeObjective,
-			includeProfSummary
-		};
-
-		let wpFileName = `${wpUserId}-${Date.now()}`;
-		const resumeJson = buildCustomResumeJson(
-			defaultLayout,
-			candidate,
-			techtagSkills,
-			resumeSettings,
-			resList,
-			wpFileName
-		);
-		console.log("resumeJson: ", resumeJson);
-		const layoutUri = encodeURIComponent(JSON.stringify(resumeJson));
-		window.open(
-			`${window.resumeUrl}?id=${candidate.id}&layout=${layoutUri}`,
-			"_blank"
-		);
-		// if resList contains true write to wp api to update _resume_file
-		resList.includes(true) &&
-			writeWpResumeFiles(wpFileName, wpResumes, resList);
-	};
-
-	const setAllSkillSwitches = onOff => {
-		onOff
-			? setIncludeOnlySkills(includeOnlySkillsOn)
-			: setIncludeOnlySkills(includeOnlySkillsOff);
-	};
-
-	const handleResSelect = rList => {
-		setResList(rList);
-		console.log("resume checklist: ", rList);
-	};
+const CustomResume = ({
+	candidate,
+	techtagSkills,
+	wpResumes,
+	handleCustomize,
+	resumeSettings,
+	handleInputChanges,
+}) => {
+	const {
+		skills,
+		maxEntries,
+		includeOnlySkills,
+		includeObjective,
+		includeProfSummary,
+	} = resumeSettings;
 
 	return (
 		<div className="cust-res-container">
@@ -118,7 +39,10 @@ const CustomResume = ({ candidate, techtagSkills, wpResumes, wpUserId }) => {
 						<h1>{candidate.person.formattedName} Resume Creation</h1>
 					</div>
 					<div>
-						<WpResumes resumes={wpResumes} handleResSelect={handleResSelect} />
+						<WpResumes
+							resumes={wpResumes}
+							handleInputChanges={handleInputChanges}
+						/>
 						<div className="parameters">
 							<div className="tsd-form-row">
 								<TextField
@@ -126,7 +50,7 @@ const CustomResume = ({ candidate, techtagSkills, wpResumes, wpUserId }) => {
 									name="skills"
 									label="Skills (comma-separated list)"
 									value={skills}
-									onChange={s => setSkills(s)}
+									onChange={(s) => handleInputChanges("skills", s)}
 									autoFocus
 								/>
 							</div>
@@ -134,20 +58,20 @@ const CustomResume = ({ candidate, techtagSkills, wpResumes, wpUserId }) => {
 								style={{
 									marginTop: "16px",
 									display: "flex",
-									justifyContent: "space-around"
+									justifyContent: "space-around",
 								}}
 							>
 								<Button
 									type="button"
 									variant="flat"
-									onClick={() => setAllSkillSwitches(true)}
+									onClick={() => handleInputChanges("includeOnlySkills", true)}
 								>
 									Filter All by Skill
 								</Button>
 								<Button
 									type="button"
 									variant="flat"
-									onClick={() => setAllSkillSwitches(false)}
+									onClick={() => handleInputChanges("includeOnlySkills", false)}
 								>
 									Include All (no skill filter)
 								</Button>
@@ -159,14 +83,18 @@ const CustomResume = ({ candidate, techtagSkills, wpResumes, wpUserId }) => {
 									name="includeObjective"
 									checked={includeObjective}
 									label="Include Objective"
-									onChange={obj => setIncludeObjective(obj)}
+									onChange={(obj) =>
+										handleInputChanges("includeObjective", obj)
+									}
 								/>
 								<SwitchBase
 									id="includeProfSummary"
 									name="includeProfSummary"
 									checked={includeProfSummary}
 									label="Include Professional Summary"
-									onChange={summ => setIncludeProfSummary(summ)}
+									onChange={(summ) =>
+										handleInputChanges("includeProfSummary", summ)
+									}
 								/>
 							</div>
 							<div className="vdiv"></div>
@@ -178,28 +106,29 @@ const CustomResume = ({ candidate, techtagSkills, wpResumes, wpUserId }) => {
 									name="maxHighlights"
 									label="Max # of Highlights"
 									value={maxEntries.highlights}
-									onChange={highlights =>
-										setMaxEntries(prev => {
-											return {
-												...prev,
-												highlights
-											};
-										})
-									}
+									onChange={(highlights) => {
+										const newMaxEntries = {
+											...maxEntries,
+											highlights,
+										};
+										return handleInputChanges("maxEntries", newMaxEntries);
+									}}
 								/>
 								<SwitchBase
 									id="includeOnlySkillsHighlights"
 									name="includeOnlySkillsHighlights"
 									checked={includeOnlySkills.highlights}
 									label="Only Highlights with Listed Skills"
-									onChange={highlights =>
-										setIncludeOnlySkills(prev => {
-											return {
-												...prev,
-												highlights
-											};
-										})
-									}
+									onChange={(highlights) => {
+										const newIncludeOnlySkills = {
+											...includeOnlySkills,
+											highlights,
+										};
+										return handleInputChanges(
+											"includeOnlySkills",
+											newIncludeOnlySkills
+										);
+									}}
 								/>
 							</div>
 							<div className="tsd-form-row">
@@ -210,28 +139,29 @@ const CustomResume = ({ candidate, techtagSkills, wpResumes, wpUserId }) => {
 									name="maxJobs"
 									label="Max # of Jobs"
 									value={maxEntries.jobs}
-									onChange={jobs =>
-										setMaxEntries(prev => {
-											return {
-												...prev,
-												jobs
-											};
-										})
-									}
+									onChange={(jobs) => {
+										const newMaxEntries = {
+											...maxEntries,
+											jobs,
+										};
+										return handleInputChanges("maxEntries", newMaxEntries);
+									}}
 								/>
 								<SwitchBase
 									id="includeOnlySkillsJobs"
 									name="includeOnlySkillsJobs"
 									checked={includeOnlySkills.jobs}
 									label="Only Jobs with Listed Skills"
-									onChange={jobs =>
-										setIncludeOnlySkills(prev => {
-											return {
-												...prev,
-												jobs
-											};
-										})
-									}
+									onChange={(jobs) => {
+										const newIncludeOnlySkills = {
+											...includeOnlySkills,
+											jobs,
+										};
+										return handleInputChanges(
+											"includeOnlySkills",
+											newIncludeOnlySkills
+										);
+									}}
 								/>
 							</div>
 							<div className="tsd-form-row">
@@ -242,28 +172,29 @@ const CustomResume = ({ candidate, techtagSkills, wpResumes, wpUserId }) => {
 									name="maxJobHi"
 									label="Max # of Job Highlights"
 									value={maxEntries.jobHighlights}
-									onChange={jobHighlights =>
-										setMaxEntries(prev => {
-											return {
-												...prev,
-												jobHighlights
-											};
-										})
-									}
+									onChange={(jobHighlights) => {
+										const newMaxEntries = {
+											...maxEntries,
+											jobHighlights,
+										};
+										return handleInputChanges("maxEntries", newMaxEntries);
+									}}
 								/>
 								<SwitchBase
 									id="includeOnlySkillsJobHighlights"
 									name="includeOnlySkillsJobHighlights"
 									checked={includeOnlySkills.jobHighlights}
 									label="Only Job Highlights with Listed Skills"
-									onChange={jobHighlights =>
-										setIncludeOnlySkills(prev => {
-											return {
-												...prev,
-												jobHighlights
-											};
-										})
-									}
+									onChange={(jobHighlights) => {
+										const newIncludeOnlySkills = {
+											...includeOnlySkills,
+											jobHighlights,
+										};
+										return handleInputChanges(
+											"includeOnlySkills",
+											newIncludeOnlySkills
+										);
+									}}
 								/>
 							</div>
 							<div className="tsd-form-row">
@@ -274,28 +205,29 @@ const CustomResume = ({ candidate, techtagSkills, wpResumes, wpUserId }) => {
 									name="maxEds"
 									label="Max # of Education Items"
 									value={maxEntries.education}
-									onChange={education =>
-										setMaxEntries(prev => {
-											return {
-												...prev,
-												education
-											};
-										})
-									}
+									onChange={(education) => {
+										const newMaxEntries = {
+											...maxEntries,
+											education,
+										};
+										return handleInputChanges("maxEntries", newMaxEntries);
+									}}
 								/>
 								<SwitchBase
 									id="includeOnlySkillsEds"
 									name="includeOnlySkillsEds"
 									checked={includeOnlySkills.education}
 									label="Only Education with Listed Skills"
-									onChange={education =>
-										setIncludeOnlySkills(prev => {
-											return {
-												...prev,
-												education
-											};
-										})
-									}
+									onChange={(education) => {
+										const newIncludeOnlySkills = {
+											...includeOnlySkills,
+											education,
+										};
+										return handleInputChanges(
+											"includeOnlySkills",
+											newIncludeOnlySkills
+										);
+									}}
 								/>
 							</div>
 							<div className="tsd-form-row">
@@ -306,28 +238,29 @@ const CustomResume = ({ candidate, techtagSkills, wpResumes, wpUserId }) => {
 									name="maxCerts"
 									label="Max # of Certifications"
 									value={maxEntries.certifications}
-									onChange={certifications =>
-										setMaxEntries(prev => {
-											return {
-												...prev,
-												certifications
-											};
-										})
-									}
+									onChange={(certifications) => {
+										const newMaxEntries = {
+											...maxEntries,
+											certifications,
+										};
+										return handleInputChanges("maxEntries", newMaxEntries);
+									}}
 								/>
 								<SwitchBase
 									id="includeOnlySkillsCerts"
 									name="includeOnlySkillsCerts"
 									checked={includeOnlySkills.certifications}
 									label="Only Certifications with Listed Skills"
-									onChange={certifications =>
-										setIncludeOnlySkills(prev => {
-											return {
-												...prev,
-												certifications
-											};
-										})
-									}
+									onChange={(certifications) => {
+										const newIncludeOnlySkills = {
+											...includeOnlySkills,
+											certifications,
+										};
+										return handleInputChanges(
+											"includeOnlySkills",
+											newIncludeOnlySkills
+										);
+									}}
 								/>
 							</div>
 							<div className="tsd-form-row">
@@ -336,14 +269,16 @@ const CustomResume = ({ candidate, techtagSkills, wpResumes, wpUserId }) => {
 									name="includeOnlySkills"
 									checked={includeOnlySkills.techtags}
 									label="Only Technical Skills (techtags) with Listed Skills"
-									onChange={techtags =>
-										setIncludeOnlySkills(prev => {
-											return {
-												...prev,
-												techtags
-											};
-										})
-									}
+									onChange={(techtags) => {
+										const newIncludeOnlySkills = {
+											...includeOnlySkills,
+											techtags,
+										};
+										return handleInputChanges(
+											"includeOnlySkills",
+											newIncludeOnlySkills
+										);
+									}}
 								/>
 							</div>
 							<div className="vdiv"></div>

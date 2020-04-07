@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Checkbox from "styledComponents/Checkbox";
 
-const WpResumes = ({ resumes, handleResSelect }) => {
+const WpResumes = ({ resumes, handleInputChanges }) => {
 	const [checkList, setCheckList] = useState(
 		resumes && resumes.length ? resumes.map(() => false) : []
 	);
@@ -10,7 +10,7 @@ const WpResumes = ({ resumes, handleResSelect }) => {
 		let tmpList = [...checkList];
 		tmpList[ndx] = checked;
 		setCheckList(tmpList);
-		handleResSelect(tmpList);
+		handleInputChanges("resList", tmpList);
 	};
 	return (
 		<div className="wp-resume-list">
@@ -26,7 +26,7 @@ const WpResumes = ({ resumes, handleResSelect }) => {
 						const {
 							id: resId,
 							_resume_file: resFileUrl,
-							_candidate_title: resTitle
+							_candidate_title: resTitle,
 						} = resume;
 						let resFile = resFileUrl.substring(resFileUrl.lastIndexOf("/") + 1);
 						return (
@@ -36,7 +36,7 @@ const WpResumes = ({ resumes, handleResSelect }) => {
 										id={`res-check-${resId}`}
 										name="res-select"
 										checked={checkList[ndx]}
-										onChange={checked => handleCheckbox(checked, ndx)}
+										onChange={(checked) => handleCheckbox(checked, ndx)}
 										label=""
 									/>
 								</div>

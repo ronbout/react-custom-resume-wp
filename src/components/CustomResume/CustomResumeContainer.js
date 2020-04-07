@@ -1,7 +1,15 @@
 /* CustomResumeContainer.js */
 import React, { Component } from "react";
 import CustomResume from "./CustomResume";
-import { candidateInfo } from "./dummyData";
+import { buildCustomResumeJson } from "./buildCustomResumeJson";
+import { writeWpResumeFiles } from "./writeWpResumeFiles";
+import {
+	candidateInfo,
+	defaultLayout,
+	defaultMaxEntries,
+	includeOnlySkillsOn,
+	includeOnlySkillsOff,
+} from "./defaultData";
 import dataFetch from "assets/js/dataFetch";
 
 const API_CANDIDATES = "candidates";
@@ -24,7 +32,13 @@ class CustomResumeContainer extends Component {
 			techtagSkills: [],
 			wpResumes: false,
 			candId,
-			wpFileName: ""
+			wpFileName: "",
+			skills: "",
+			maxEntries: defaultMaxEntries,
+			includeOnlySkills: includeOnlySkillsOff,
+			includeObjective: true,
+			includeProfSummary: true,
+			resList: [],
 		};
 	}
 
@@ -38,7 +52,7 @@ class CustomResumeContainer extends Component {
 		this.wpUserId && this.loadWpResumes(this.wpUserId);
 	}
 
-	loadCandidateInfo = async candId => {
+	loadCandidateInfo = async (candId) => {
 		const endpoint = `${API_CANDIDATES}/${candId}`;
 		const candidateApiInfo = await dataFetch(endpoint);
 		if (candidateApiInfo.error) {
@@ -53,13 +67,13 @@ class CustomResumeContainer extends Component {
 		} else {
 			const candidate = candidateApiInfo ? candidateApiInfo : candidateInfo;
 			this.setState({
-				candidate
+				candidate,
 			});
 		}
 		return true;
 	};
 
-	buildTechSkils = candidateSkillInfo => {
+	buildTechSkils = (candidateSkillInfo) => {
 		const techSkills = candidateSkillInfo.reduce((techArray, skill) => {
 			if (!skill.resumeTechtagId) return techArray;
 			const tagId = skill.resumeTechtagId;
@@ -71,7 +85,7 @@ class CustomResumeContainer extends Component {
 		return techSkills;
 	};
 
-	loadCandidateSkills = async candId => {
+	loadCandidateSkills = async (candId) => {
 		const endpoint = `${API_CANDIDATE_SKILLS}/${candId}`;
 		const candidateSkillInfo = await dataFetch(endpoint);
 		if (candidateSkillInfo.error) {
@@ -84,12 +98,12 @@ class CustomResumeContainer extends Component {
 		} else {
 			const techtagSkills = this.buildTechSkils(candidateSkillInfo.skills);
 			this.setState({
-				techtagSkills
+				techtagSkills,
 			});
 		}
 	};
 
-	loadWpResumes = async userId => {
+	loadWpResumes = async (userId) => {
 		const urlBase = window.wpApi.root;
 		const endpoint = "wp/v2/resumes";
 		const queryStr = "author=" + userId;
@@ -107,9 +121,66 @@ class CustomResumeContainer extends Component {
 		} else {
 			console.log("Wordpress ATS resumes: ", wpResumes);
 			this.setState({
-				wpResumes
+				wpResumes,
 			});
 		}
+	};
+
+	buildResumeSettings = () => {
+		const {
+			skills,
+			maxEntries,
+			includeOnlySkills,
+			includeObjective,
+			includeProfSummary,
+		} = this.state;
+
+		return {
+			skills,
+			maxEntries,
+			includeOnlySkills,
+			includeObjective,
+			includeProfSummary,
+		};
+	};
+
+	setAllSkillSwitches = (onOff) => {
+		onOff
+			? this.setState({ includeOnlySkills: includeOnlySkillsOn })
+			: this.setState({ includeOnlySkills: includeOnlySkillsOff });
+	};
+
+	handleInputChanges = (field, value) => {
+		if (field === "includeOnlySkills") {
+			this.setAllSkillSwitches(value);
+			return;
+		}
+		this.setState({
+			[field]: value,
+		});
+	};
+
+	handleCustomize = () => {
+		const resumeSettings = this.buildResumeSettings();
+
+		let wpFileName = `${this.wpUserId}-${Date.now()}`;
+		const resumeJson = buildCustomResumeJson(
+			defaultLayout,
+			this.state.candidate,
+			this.state.techtagSkills,
+			resumeSettings,
+			this.state.resList,
+			wpFileName
+		);
+		console.log("resumeJson: ", resumeJson);
+		const layoutUri = encodeURIComponent(JSON.stringify(resumeJson));
+		window.open(
+			`${window.resumeUrl}?id=${this.state.candidate.id}&layout=${layoutUri}`,
+			"_blank"
+		);
+		// if resList contains true write to wp api to update _resume_file
+		this.state.resList.includes(true) &&
+			writeWpResumeFiles(wpFileName, this.state.wpResumes, this.state.resList);
 	};
 
 	render() {
@@ -118,7 +189,10 @@ class CustomResumeContainer extends Component {
 				candidate={this.state.candidate}
 				techtagSkills={this.state.techtagSkills}
 				wpResumes={this.state.wpResumes}
-				wpUserId={this.wpUserId}
+				handleCustomize={this.handleCustomize}
+				resumeSettings={this.buildResumeSettings()}
+				handleInputChanges={this.handleInputChanges}
+				resList={this.state.resList}
 			/>
 		);
 	}

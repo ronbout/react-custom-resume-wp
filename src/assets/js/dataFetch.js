@@ -28,26 +28,25 @@ export default async function dataFetch(
 	if (wpFlag) {
 		let wpHeaders = wpNonce
 			? {
-					"X-WP-Nonce": wpNonce
+					"X-WP-Nonce": wpNonce,
 			  }
 			: {
 					Authorization: `Basic ${window.btoa(
 						"Ronbout:xid4oN&@g4y9wTAul&Kfirs8"
-					)}`
+					)}`,
 			  };
 		headers = {
 			headers: {
 				...headers.headers,
-				...wpHeaders
-			}
+				...wpHeaders,
+			},
 		};
 	}
-	console.log("headers: ", headers);
 	let httpConfig = body
 		? {
 				method: httpMethod,
 				body: formData ? body : JSON.stringify(body),
-				...headers
+				...headers,
 		  }
 		: {};
 
