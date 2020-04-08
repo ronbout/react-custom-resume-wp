@@ -20,6 +20,7 @@ const CustomResume = ({
 	handleCustomize,
 	resumeSettings,
 	handleInputChanges,
+	resList,
 }) => {
 	const {
 		skills,
@@ -42,6 +43,7 @@ const CustomResume = ({
 						<WpResumes
 							resumes={wpResumes}
 							handleInputChanges={handleInputChanges}
+							resList={resList}
 						/>
 						<div className="parameters">
 							<div className="tsd-form-row">

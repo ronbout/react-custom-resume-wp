@@ -1,15 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import Checkbox from "styledComponents/Checkbox";
 
-const WpResumes = ({ resumes, handleInputChanges }) => {
-	const [checkList, setCheckList] = useState(
-		resumes && resumes.length ? resumes.map(() => false) : []
-	);
-
+const WpResumes = ({ resumes, handleInputChanges, resList }) => {
 	const handleCheckbox = (checked, ndx) => {
-		let tmpList = [...checkList];
+		let tmpList = [...resList];
 		tmpList[ndx] = checked;
-		setCheckList(tmpList);
 		handleInputChanges("resList", tmpList);
 	};
 	return (
@@ -35,7 +30,7 @@ const WpResumes = ({ resumes, handleInputChanges }) => {
 									<Checkbox
 										id={`res-check-${resId}`}
 										name="res-select"
-										checked={checkList[ndx]}
+										checked={resList[ndx]}
 										onChange={(checked) => handleCheckbox(checked, ndx)}
 										label=""
 									/>

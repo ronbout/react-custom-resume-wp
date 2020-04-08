@@ -11,6 +11,7 @@ import {
 	includeOnlySkillsOff,
 } from "./defaultData";
 import dataFetch from "assets/js/dataFetch";
+import { objCopy } from "assets/js/library";
 
 const API_CANDIDATES = "candidates";
 const API_CANDIDATE_SKILLS = "candidate_skills/candidate_id";
@@ -120,8 +121,10 @@ class CustomResumeContainer extends Component {
 			console.log("Error accessing Wordpress ATS resumes: ", wpResumes);
 		} else {
 			console.log("Wordpress ATS resumes: ", wpResumes);
+			const resList = Array(wpResumes.length).fill(false);
 			this.setState({
 				wpResumes,
+				resList,
 			});
 		}
 	};
@@ -179,8 +182,29 @@ class CustomResumeContainer extends Component {
 			"_blank"
 		);
 		// if resList contains true write to wp api to update _resume_file
-		this.state.resList.includes(true) &&
-			writeWpResumeFiles(wpFileName, this.state.wpResumes, this.state.resList);
+		if (this.state.resList.includes(true)) {
+			const wpUpdateResult = writeWpResumeFiles(
+				wpFileName,
+				this.state.wpResumes,
+				this.state.resList
+			);
+			if (!wpUpdateResult.code) {
+				// code property is how wp sends error info
+				// so this must be success
+				this.updateWpResumes(wpFileName);
+			}
+		}
+	};
+
+	updateWpResumes = (wpFileName) => {
+		const wpResumes = objCopy(this.state.wpResumes);
+		const { resList } = this.state;
+		resList.forEach((checked, ndx) => {
+			if (checked) {
+				wpResumes[ndx]._resume_file = wpFileName + ".pdf";
+			}
+		});
+		this.setState({ wpResumes });
 	};
 
 	render() {
