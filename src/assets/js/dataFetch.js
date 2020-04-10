@@ -21,9 +21,15 @@ export default async function dataFetch(
 ) {
 	const apiQuery = !wpFlag ? API_QUERY : queryStr ? "?" : "";
 	let basicUrl = `${urlBase}${endpoint}${apiQuery}${queryStr}`;
-	let headers = formData
-		? {}
-		: { headers: { "Content-Type": "application/json" } };
+	let headers = {};
+	headers = {
+		headers: {
+			"Cache-Control": "no-cache",
+		},
+	};
+	headers = formData
+		? headers
+		: { headers: { ...headers.headers, "Content-Type": "application/json" } };
 
 	if (wpFlag) {
 		let wpHeaders = wpNonce
@@ -42,13 +48,15 @@ export default async function dataFetch(
 			},
 		};
 	}
+
+	console.log(headers);
 	let httpConfig = body
 		? {
 				method: httpMethod,
 				body: formData ? body : JSON.stringify(body),
 				...headers,
 		  }
-		: {};
+		: { ...headers };
 
 	try {
 		const response = await fetch(basicUrl, httpConfig);
