@@ -9,7 +9,7 @@ import CustomResumeContainer from "components/CustomResume/";
 // will be coming from wp react page
 // through window.apiLoc
 
-// window.apiLoc = "local";
+window.apiLoc = window.apiLoc ? window.apiLoc : "local";
 const API_HOST = window.apiLoc === "local" ? "localhost" : "13.90.143.153";
 const WP_HOST = window.wpHost ? window.wpHost : "http://jimbo.local";
 

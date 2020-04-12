@@ -1,6 +1,7 @@
 // default data
 export const candidateInfo = {
 	id: "",
+	userId: "",
 	person: {
 		id: "",
 		formattedName: "",

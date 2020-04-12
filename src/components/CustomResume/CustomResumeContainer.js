@@ -48,9 +48,6 @@ class CustomResumeContainer extends Component {
 		this.state.candId !== "undefined" &&
 			this.loadCandidateInfo(this.state.candId) &&
 			this.loadCandidateSkills(this.state.candId);
-
-		// if userId exists, then pull from wp api
-		this.wpUserId && this.loadWpResumes(this.wpUserId);
 	}
 
 	loadCandidateInfo = async (candId) => {
@@ -67,6 +64,8 @@ class CustomResumeContainer extends Component {
 			return false;
 		} else {
 			const candidate = candidateApiInfo ? candidateApiInfo : candidateInfo;
+			candidate.userId && this.loadWpResumes(candidate.userId);
+			// if userId exists, then pull from wp api
 			this.setState({
 				candidate,
 			});
