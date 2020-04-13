@@ -153,7 +153,7 @@ class CustomResumeContainer extends Component {
 	};
 
 	handleInputChanges = (field, value) => {
-		if (field === "includeOnlySkills") {
+		if (field === "includeOnlySkillsAll") {
 			this.setAllSkillSwitches(value);
 			return;
 		}

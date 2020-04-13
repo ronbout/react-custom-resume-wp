@@ -49,7 +49,7 @@ export default async function dataFetch(
 		};
 	}
 
-	console.log(headers);
+	// console.log(headers);
 	let httpConfig = body
 		? {
 				method: httpMethod,
