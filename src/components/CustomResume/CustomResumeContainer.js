@@ -35,6 +35,7 @@ class CustomResumeContainer extends Component {
 			candId,
 			wpFileName: "",
 			skills: "",
+			skillList: [],
 			maxEntries: defaultMaxEntries,
 			includeOnlySkills: includeOnlySkillsOff,
 			includeObjective: true,
@@ -131,6 +132,7 @@ class CustomResumeContainer extends Component {
 	buildResumeSettings = () => {
 		const {
 			skills,
+			skillList,
 			maxEntries,
 			includeOnlySkills,
 			includeObjective,
@@ -139,6 +141,7 @@ class CustomResumeContainer extends Component {
 
 		return {
 			skills,
+			skillList,
 			maxEntries,
 			includeOnlySkills,
 			includeObjective,
@@ -163,7 +166,16 @@ class CustomResumeContainer extends Component {
 	};
 
 	handleCustomize = () => {
-		const resumeSettings = this.buildResumeSettings();
+		let resumeSettings = this.buildResumeSettings();
+
+		// convert skillList into comma-delimited string, like original code
+		// easier, although not as efficient as rewriting a the code to
+		// compare id's instead of strings
+
+		const skills = this.convertSkillList(resumeSettings.skillList);
+		console.log("skills converted: ", skills);
+
+		resumeSettings = { ...resumeSettings, skills };
 
 		let wpFileName = `${this.wpUserId}-${Date.now()}`;
 		const resumeJson = buildCustomResumeJson(
@@ -193,6 +205,10 @@ class CustomResumeContainer extends Component {
 				this.updateWpResumes(wpFileName);
 			}
 		}
+	};
+
+	convertSkillList = (skillList) => {
+		return skillList.map((s) => s.name).join();
 	};
 
 	updateWpResumes = (wpFileName) => {

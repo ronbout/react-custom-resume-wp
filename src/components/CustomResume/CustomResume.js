@@ -35,6 +35,7 @@ const CustomResume = ({
 						<div className="parameters">
 							<CustomResumeSkills
 								skills={resumeSettings.skills}
+								skillList={resumeSettings.skillList}
 								handleInputChanges={handleInputChanges}
 							/>
 							<div className="vdiv"></div>

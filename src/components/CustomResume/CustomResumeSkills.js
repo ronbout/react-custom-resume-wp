@@ -1,22 +1,22 @@
 /* CustomResumeSkills.js */
 import React from "react";
+import SkillList from "components/SkillSetup/SkillList";
 // import SwitchBase from "styledComponents/SwitchBase";
 import Button from "styledComponents/Button";
-import TextField from "styledComponents/TextField";
 
-const CustomResumeSkills = ({ skills, handleInputChanges }) => {
+const CustomResumeSkills = ({ skills, skillList, handleInputChanges }) => {
+	const handleOnSkillsChange = (s) => {
+		handleInputChanges("skillList", s);
+		console.log(s);
+	};
+
 	return (
 		<React.Fragment>
-			<div className="tsd-form-row">
-				<TextField
-					id="skills"
-					name="skills"
-					label="Skills (comma-separated list)"
-					value={skills}
-					onChange={(s) => handleInputChanges("skills", s)}
-					autoFocus
-				/>
-			</div>
+			<SkillList
+				skills={skillList}
+				editFlag={true}
+				handleSkillsChange={handleOnSkillsChange}
+			/>
 			<div
 				style={{
 					marginTop: "16px",
