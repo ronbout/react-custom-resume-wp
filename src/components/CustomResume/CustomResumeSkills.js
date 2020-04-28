@@ -7,7 +7,6 @@ import Button from "styledComponents/Button";
 const CustomResumeSkills = ({ skills, skillList, handleInputChanges }) => {
 	const handleOnSkillsChange = (s) => {
 		handleInputChanges("skillList", s);
-		console.log(s);
 	};
 
 	return (

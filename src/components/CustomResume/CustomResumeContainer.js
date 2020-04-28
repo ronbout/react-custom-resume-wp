@@ -2,6 +2,7 @@
 import React, { Component } from "react";
 import CustomResume from "./CustomResume";
 import { buildCustomResumeJson } from "./buildCustomResumeJson";
+import { convertSkillList } from "./convertSkillList";
 import { writeWpResumeFiles } from "./writeWpResumeFiles";
 import {
 	candidateInfo,
@@ -74,7 +75,7 @@ class CustomResumeContainer extends Component {
 		return true;
 	};
 
-	buildTechSkils = (candidateSkillInfo) => {
+	buildTechSkills = (candidateSkillInfo) => {
 		const techSkills = candidateSkillInfo.reduce((techArray, skill) => {
 			if (!skill.resumeTechtagId) return techArray;
 			const tagId = skill.resumeTechtagId;
@@ -97,7 +98,7 @@ class CustomResumeContainer extends Component {
 			 *
 			 */
 		} else {
-			const techtagSkills = this.buildTechSkils(candidateSkillInfo.skills);
+			const techtagSkills = this.buildTechSkills(candidateSkillInfo.skills);
 			this.setState({
 				techtagSkills,
 			});
@@ -165,15 +166,14 @@ class CustomResumeContainer extends Component {
 		});
 	};
 
-	handleCustomize = () => {
+	handleCustomize = async () => {
 		let resumeSettings = this.buildResumeSettings();
 
-		// convert skillList into comma-delimited string, like original code
-		// easier, although not as efficient as rewriting a the code to
-		// compare id's instead of strings
+		// convert skillList into comma-delimited string, including
+		// both the listed skill and all child skills
 
-		const skills = this.convertSkillList(resumeSettings.skillList);
-		console.log("skills converted: ", skills);
+		const skills = await convertSkillList(resumeSettings.skillList);
+		// console.log("skills converted: ", skills);
 
 		resumeSettings = { ...resumeSettings, skills };
 
@@ -205,10 +205,6 @@ class CustomResumeContainer extends Component {
 				this.updateWpResumes(wpFileName);
 			}
 		}
-	};
-
-	convertSkillList = (skillList) => {
-		return skillList.map((s) => s.name).join();
 	};
 
 	updateWpResumes = (wpFileName) => {

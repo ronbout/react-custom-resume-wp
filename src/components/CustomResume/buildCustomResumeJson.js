@@ -23,16 +23,16 @@ export const buildCustomResumeJson = (
 		maxEntries,
 		includeOnlySkills,
 		includeObjective,
-		includeProfSummary
+		includeProfSummary,
 	} = resumeSettings;
 	const skillList = skills.trim()
 		? skills
 				.trim()
 				.split(",")
-				.map(s => s.trim())
+				.map((s) => s.trim())
 		: [];
 
-	console.log("skillList: ", skillList);
+	// console.log("skillList: ", skillList);
 
 	// first get the main candidate highlights
 	const candHighlights = chooseHighlights(
@@ -122,7 +122,7 @@ const chooseHighlights = (
 	// loop through the skills, find highlights that string match the skills
 	for (const skill of skillList) {
 		const fndHi = checkHighlightsDesc(highlights, skill);
-		console.log("highlight string comp loop (skill, fndHi): ", skill, fndHi);
+		// console.log("highlight string comp loop (skill, fndHi): ", skill, fndHi);
 		retHighlights = [...new Set(retHighlights.concat(fndHi))];
 		// check lenght vs maxHi
 		if (retHighlights.length >= maxHi) {
@@ -144,7 +144,7 @@ const getRemainingSection = (section, curIds, maxIds) => {
 	// copy curIds into separate array so that we don't change original
 	let retIds = objCopy(curIds);
 	for (const item of section) {
-		!retIds.some(rh => rh === item.id) && retIds.push(item.id);
+		!retIds.some((rh) => rh === item.id) && retIds.push(item.id);
 		if (retIds.length >= maxIds) break;
 	}
 	return retIds;
@@ -152,10 +152,7 @@ const getRemainingSection = (section, curIds, maxIds) => {
 
 const checkHighlightsDesc = (highlights, skill) => {
 	// returns array of highlight id's that have the skill
-	const compareSkill = skill
-		.toString()
-		.toUpperCase()
-		.trim();
+	const compareSkill = skill.toString().toUpperCase().trim();
 	const retArray = highlights.reduce((list, h) => {
 		if (h.highlight.toUpperCase().includes(compareSkill)) {
 			list.push(h.id);
@@ -196,18 +193,11 @@ const chooseSectionIdsBySkills = (
 const checkSectionBySkill = (section, skill) => {
 	// returns array of section id's that have the skill
 	// used for highlights, experience, education
-	const compareSkill = skill
-		.toString()
-		.toUpperCase()
-		.trim();
+	const compareSkill = skill.toString().toUpperCase().trim();
 	const retArray = section.reduce((list, item) => {
 		if (
 			item.skills.some(
-				s =>
-					s.name
-						.toString()
-						.toUpperCase()
-						.trim() === compareSkill
+				(s) => s.name.toString().toUpperCase().trim() === compareSkill
 			)
 		) {
 			list.push(item.id);
@@ -226,8 +216,8 @@ const buildExperienceObjs = (
 	includeOnlySkills = false
 ) => {
 	// loop through id's, get the experience and run chooseHighlights
-	let candExpObj = candExpIds.map(id => {
-		const exp = candExpAll.find(e => e.id === id);
+	let candExpObj = candExpIds.map((id) => {
+		const exp = candExpAll.find((e) => e.id === id);
 		const expH = chooseHighlights(
 			exp.highlights,
 			skillList,
@@ -236,7 +226,7 @@ const buildExperienceObjs = (
 		);
 		return {
 			id,
-			expH
+			expH,
 		};
 	});
 	return candExpObj;
@@ -257,21 +247,14 @@ const chooseTechtagSkills = (includeOnlySkills, techtagSkills, skillList) => {
 };
 
 const checkTechtagSkills = (techtags, skill) => {
-	const compareSkill = skill
-		.toString()
-		.toUpperCase()
-		.trim();
+	const compareSkill = skill.toString().toUpperCase().trim();
 	// convert object techtags to array with object entries
 	// make sure to sort first
 	const techtagArray = Object.entries(techtags).sort((a, b) => a[0] - b[0]);
 	const retArray = techtagArray.reduce((list, t) => {
 		if (
 			t[1].skills.some(
-				s =>
-					s
-						.toString()
-						.toUpperCase()
-						.trim() === compareSkill
+				(s) => s.toString().toUpperCase().trim() === compareSkill
 			)
 		) {
 			list.push(Number(t[0]));
@@ -287,7 +270,7 @@ const getRemainingTechtags = (techtags, curIds) => {
 	let retIds = objCopy(curIds);
 	const techtagArray = Object.entries(techtags).sort((a, b) => a[0] - b[0]);
 	for (const tt of techtagArray) {
-		!retIds.some(rI => rI === Number(tt[0])) && retIds.push(Number(tt[0]));
+		!retIds.some((rI) => rI === Number(tt[0])) && retIds.push(Number(tt[0]));
 	}
 	return retIds;
 };
@@ -312,39 +295,39 @@ const loadLayout = (
 	console.log("post summary test: ", layout);
 
 	// loop through layout and add display info for appropriate sections
-	const newSections = layout.sections.map(section => {
+	const newSections = layout.sections.map((section) => {
 		switch (section.name) {
 			case "hd":
 				return { ...section };
 			case "hi":
 				return {
 					...section,
-					disp: candHighlights
+					disp: candHighlights,
 				};
 			case "ts":
 				return {
 					...section,
-					disp: techtagIds
+					disp: techtagIds,
 				};
 			case "ex":
 				return {
 					...section,
-					disp: candExperience
+					disp: candExperience,
 				};
 			case "ed":
 				return {
 					...section,
-					disp: candEducation
+					disp: candEducation,
 				};
 			case "ct":
 				return {
 					...section,
-					disp: candCertification
+					disp: candCertification,
 				};
 			case "dl":
 				return {
 					...section,
-					file: resList.includes(true) ? wpFileName : ""
+					file: resList.includes(true) ? wpFileName : "",
 				};
 			default:
 				return { ...section };
@@ -352,12 +335,12 @@ const loadLayout = (
 	});
 	return {
 		...layout,
-		sections: { ...newSections }
+		sections: { ...newSections },
 	};
 };
 
 const removeLayoutSection = (sectCode, layout) => {
-	const ndx = layout.sections.findIndex(s => s.name === sectCode);
+	const ndx = layout.sections.findIndex((s) => s.name === sectCode);
 	layout.sections.splice(ndx, 1);
 	return layout;
 };
