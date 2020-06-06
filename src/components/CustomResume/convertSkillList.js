@@ -7,6 +7,7 @@ const API_RELATED_SKILLS = "skill/relatedtree";
 export const convertSkillList = async (skillList) => {
 	// need to convert id's in comma list and send to
 	// skill tree api so that all child skills are included
+	if (!skillList.length) return "";
 	const getRelatedSkills = async (idList) => {
 		const endpoint = `${API_RELATED_SKILLS}/${idList}`;
 		const queryStr = "&ttype=child";
